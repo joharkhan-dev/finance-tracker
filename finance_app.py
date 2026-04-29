@@ -123,43 +123,81 @@ with st.sidebar:
     st.divider()
 
 st.header("🤖 AI Assistant")
-ai_input = st.text_input("Tell me what you spent:", placeholder="e.g., £15 on Nando's")
-    
-if st.button("✨ Process with AI"):
+
+_CATEGORIES = ["Food", "Transport", "Bills", "Shopping", "Entertainment", "Health", "Income"]
+
+if "pending_tx" not in st.session_state:
+    ai_input = st.text_input("Tell me what you spent:", placeholder="e.g., £15 on Nando's")
+
+    if st.button("✨ Process with AI"):
         with st.spinner("Thinking..."):
             data = ai_parse(ai_input)
-            
             if "error" not in data:
-                # Auto-fill the form logic would go here, but for now let's just save it!
-                new_row = pd.DataFrame([{
-                    "Date": data['date'],
-                    "Type": data['type'],
-                    "Category": data['category'],
-                    "Item": data['item'],
-                    "Cost": float(data['amount']),
-                    "User": "Joint" if user == "All" else user
-                }])
-                
-                # ... inside the AI success block ...
-                
-                if not demo_mode:
-                    row_to_add = new_row.iloc[0].values.tolist()
-                    # Safe Date Fix: Works for String OR Timestamp
-                    row_to_add[0] = str(row_to_add[0]).split(' ')[0]
-                    sheet = get_google_sheet()
-                    sheet.append_row(row_to_add)
-                    st.success(f"✅ Saved: {data['item']}")
-                    st.cache_data.clear()
-                    st.rerun()
-                else:
-                    # FAKE SAVE (For Demo)
-                    st.balloons()
-                    st.success(f"🎉 [DEMO] Simulation: Would have saved '{data['item']}' for £{data['amount']}")
-
+                st.session_state["pending_tx"] = data
+                st.rerun()
             else:
                 st.error(f"Error details: {data['error']}")
-    
-st.divider() # Adds a nice line separator
+
+else:
+    tx = st.session_state["pending_tx"]
+
+    with st.container(border=True):
+        st.markdown(
+            """<div style="background:#e8f5e9;border-left:4px solid #43a047;padding:0.6rem 1rem;"""
+            """border-radius:4px;margin-bottom:0.75rem">"""
+            """<strong>🤖 AI Parsed — Review & Confirm</strong>&nbsp;&nbsp;"""
+            """<span style="font-size:0.85rem;color:#555">Edit any field before saving.</span>"""
+            """</div>""",
+            unsafe_allow_html=True,
+        )
+
+        col1, col2 = st.columns(2)
+
+        try:
+            default_date = pd.to_datetime(tx["date"]).date()
+        except Exception:
+            default_date = pd.Timestamp.now().date()
+
+        confirmed_date = col1.date_input("Date", value=default_date)
+        confirmed_item = col2.text_input("Description", value=tx.get("item", ""))
+        confirmed_amount = col1.number_input(
+            "Amount (£)", value=float(tx.get("amount", 0.0)), min_value=0.0, format="%.2f"
+        )
+
+        ai_cat = tx.get("category", "Food")
+        cat_index = _CATEGORIES.index(ai_cat) if ai_cat in _CATEGORIES else 0
+        confirmed_category = col2.selectbox("Category", _CATEGORIES, index=cat_index)
+
+        ai_type = tx.get("type", "Expense")
+        confirmed_type = st.radio(
+            "Type", ["Expense", "Income"], index=1 if ai_type == "Income" else 0, horizontal=True
+        )
+
+        _user_options = ["Me", "Partner", "Joint"]
+        _default_user = user if user != "All" else "Joint"
+        confirmed_user = st.selectbox(
+            "User",
+            _user_options,
+            index=_user_options.index(_default_user) if _default_user in _user_options else 2,
+        )
+
+        st.divider()
+        btn_save, btn_cancel = st.columns([2, 1])
+
+        if btn_save.button("✅ Confirm & Save", type="primary", use_container_width=True):
+            if not demo_mode:
+                save_data(confirmed_date, confirmed_category, confirmed_item, confirmed_amount, confirmed_type, confirmed_user)
+                st.toast(f"✅ Saved: {confirmed_item}")
+            else:
+                st.toast(f"🎉 [DEMO] Would save '{confirmed_item}' for £{confirmed_amount:.2f}")
+            del st.session_state["pending_tx"]
+            st.rerun()
+
+        if btn_cancel.button("✖ Cancel", use_container_width=True):
+            del st.session_state["pending_tx"]
+            st.rerun()
+
+st.divider()
     
 # --- SIDEBAR: ADD TRANSACTION ---
 with st.sidebar.form("expense_form"):
