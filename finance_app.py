@@ -326,7 +326,12 @@ def generate_insights(summary_text):
             "Do not use bullet points — number them 1, 2, 3. Be direct and specific "
             f"with numbers from the data.\n\n{summary_text}"
         )
-        response = model.generate_content(prompt)
+        response = model.generate_content(
+            prompt,
+            generation_config=genai.GenerationConfig(
+                thinking_config={"thinking_budget": 0}
+            ),
+        )
         return response.text.strip()
     except Exception as e:
         return f"Error generating insights: {e}"
