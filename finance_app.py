@@ -318,7 +318,7 @@ def generate_insights(summary_text):
     """Calls Gemini with a spending summary and returns 3 plain-English insights."""
     try:
         genai.configure(api_key=st.secrets["GOOGLE_API_KEY"])
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-2.0-flash')
         prompt = (
             "You are a personal finance assistant. Given this spending summary, "
             "provide 3 concise, specific insights in plain English. Each insight should "
@@ -326,12 +326,7 @@ def generate_insights(summary_text):
             "Do not use bullet points — number them 1, 2, 3. Be direct and specific "
             f"with numbers from the data.\n\n{summary_text}"
         )
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.GenerationConfig(
-                thinking_config={"thinking_budget": 0}
-            ),
-        )
+        response = model.generate_content(prompt)
         return response.text.strip()
     except Exception as e:
         return f"Error generating insights: {e}"
