@@ -4,7 +4,7 @@ import json
 import pandas as pd
 import plotly.express as px
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+from google.oauth2.service_account import Credentials
 
 # --- GOOGLE SHEETS SETUP ---
 SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -12,7 +12,7 @@ SCOPE = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/au
 def get_google_sheet():
     """Connects to the Google Sheet using secrets."""
     try:
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(st.secrets["gcp_service_account"], SCOPE)
+        creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=SCOPE)
         client = gspread.authorize(creds)
         return client.open("Finance Tracker").sheet1
     except Exception as e:
@@ -166,14 +166,13 @@ with st.sidebar.form("expense_form"):
     st.sidebar.header("➕ Add Transaction")
     type_ = st.radio("Type", ["Expense", "Income"], horizontal=True)
     new_date = st.date_input("Date")
-    new_cat = st.selectbox("Category", ["Food", "Travel", "Bills", "Salary", "Rent", "Entertainment", "Other"])
+    new_cat = st.selectbox("Category", ["Food", "Transport", "Bills", "Shopping", "Entertainment", "Health", "Income"])
     new_item = st.text_input("Description (e.g. Pizza)")
     new_cost = st.number_input("Amount (£)", min_value=0.0, format="%.2f")
     
     submitted = st.form_submit_button("Save Transaction")
     if submitted:
         save_data(new_date, new_cat, new_item, new_cost, type_, user)
-        st.success("Saved!")
 
 # --- TABS LAYOUT ---
 tab1, tab2 = st.tabs(["📊 Dashboard", "📝 Manage Data"])
@@ -194,7 +193,10 @@ else:
 
 with tab1:
     # --- DASHBOARD LOGIC ---
-    
+    total_income = 0
+    total_expense = 0
+    filtered_df = pd.DataFrame()
+
     if not df.empty:
         # 1. CLEAN DATA (Crucial for Google Sheets!)
         # Convert 'Cost' to numbers (remove £ symbols if any)
@@ -254,27 +256,30 @@ with tab1:
 
     else:
         st.warning(f"⚠️ Your balance is negative (-£{abs(net_balance):,.2f}). You need a positive balance to start saving!")
-        
-        # 5. CHARTS
-        st.divider()
-        c1, c2 = st.columns(2)
-        
-        with c1:
-            st.subheader("Expenses by Category")
-            expenses_only = filtered_df[filtered_df['Type'] == "Expense"]
-            if not expenses_only.empty:
-                fig_pie = px.pie(expenses_only, values='Cost', names='Category', hole=0.4)
-                st.plotly_chart(fig_pie, use_container_width=True)
-            else:
-                st.info("No expenses in this period.")
 
-        with c2:
-            st.subheader("Income vs Expense")
-            grouped = filtered_df.groupby("Type")['Cost'].sum().reset_index()
+    # 5. CHARTS
+    st.divider()
+    c1, c2 = st.columns(2)
+
+    with c1:
+        st.subheader("Expenses by Category")
+        expenses_only = filtered_df[filtered_df['Type'] == "Expense"]
+        if not expenses_only.empty:
+            fig_pie = px.pie(expenses_only, values='Cost', names='Category', hole=0.4)
+            st.plotly_chart(fig_pie, use_container_width=True)
+        else:
+            st.info("No expenses in this period.")
+
+    with c2:
+        st.subheader("Income vs Expense")
+        grouped = filtered_df.groupby("Type")['Cost'].sum().reset_index()
+        if not grouped.empty:
             fig_bar = px.bar(grouped, x="Type", y="Cost", color="Type", text_auto='.2s')
             st.plotly_chart(fig_bar, use_container_width=True)
- 
-   # --- NEW SECTION: SPENDING TRENDS ---
+        else:
+            st.info("No data in this period.")
+
+    # --- NEW SECTION: SPENDING TRENDS ---
     st.divider() # Draw a line to separate sections
     st.subheader("📈 Spending Trend")
 

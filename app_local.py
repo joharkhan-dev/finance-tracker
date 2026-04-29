@@ -136,7 +136,7 @@ with tab2:
                 row_id = int(selected_option.split("|")[0].replace("ID:", "").strip())
                 delete_data(row_id)
                 st.success("Deleted! Refreshing...")
-                st.experimental_rerun()
+                st.rerun()
         else:
             st.write("No data to delete.")
             
