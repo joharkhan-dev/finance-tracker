@@ -13,7 +13,7 @@ def get_google_sheet():
     """Connects to the Google Sheet using secrets."""
     try:
         creds = Credentials.from_service_account_info(st.secrets["gcp_service_account"], scopes=SCOPE)
-        client = gspread.authorize(creds)
+        client = gspread.Client(auth=creds)
         return client.open("Finance Tracker").sheet1
     except Exception as e:
         st.error(f"Connection Error: {e}")
