@@ -99,9 +99,9 @@ When starting a new session, read this file first, then tackle the next unchecke
 - [x] **Supabase migration** — replaced Google Sheets entirely; fixed column casing bugs; tested end-to-end locally
 
 ### Phase 2 — Portfolio Polish
-- [x] AI confirmation step — `st.session_state["pending_tx"]` stores parse result; green-bordered review card with editable fields; Confirm & Save / Cancel buttons; `st.toast` persists through rerun
-- [ ] **Professional visual redesign** — dark navy/gold theme, custom CSS cards ⬅️ **START HERE**
-- [ ] AI spending insights panel
+- [x] AI confirmation step — `st.session_state["pending_tx"]` stores parse result; gold-bordered review card with editable fields; Confirm & Save / Cancel buttons; `st.toast` persists through rerun
+- [x] **Professional visual redesign** — dark navy/gold theme (`#0a0e1a`/`#f59e0b`), `inject_custom_css()`, `render_metric_card()`, `style_figure()`, sidebar logo/tagline/section labels, Inter font via Google Fonts
+- [ ] **AI spending insights panel** — Gemini commentary after data load ⬅️ **NEXT**
 - [ ] Monthly breakdown view
 - [ ] Budget alerts
 - [ ] Export to CSV button
@@ -144,4 +144,4 @@ When starting a new session, read this file first, then tackle the next unchecke
 
 ---
 
-*Last updated: 2026-04-29 — Supabase migration complete, Phase 2 visual redesign next*
+*Last updated: 2026-04-29 — Phase 2 visual redesign complete, AI spending insights panel next*

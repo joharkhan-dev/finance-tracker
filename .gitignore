@@ -1,5 +1,8 @@
 .venv/
 .streamlit/secrets.toml
 __pycache__/
+*.pyc
 *.db
 my_tracker.csv
+app_local.py
+.DS_Store
