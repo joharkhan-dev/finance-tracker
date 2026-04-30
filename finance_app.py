@@ -14,8 +14,8 @@ def get_supabase():
 st.set_page_config(page_title="FinanceAI", page_icon="◈", layout="wide")
 
 # --- GEMINI SETUP ---
-
-gemini_client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
+# Client is instantiated inside each function to avoid module-level
+# SDK initialisation crashing the Streamlit Cloud session.
 
 # --- VISUAL HELPERS ---
 
@@ -301,6 +301,7 @@ def load_data():
 def ai_parse(text):
     """Sends text to Gemini and gets structured data back."""
     try:
+        client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
         prompt = f"""
         You are a financial assistant. Extract transaction details from: "{text}".
         Return ONLY a JSON object with these keys:
@@ -310,7 +311,7 @@ def ai_parse(text):
         - "type": "Income" or "Expense"
         - "date": YYYY-MM-DD (assume today is {pd.Timestamp.now().strftime('%Y-%m-%d')} if not specified)
         """
-        response = gemini_client.models.generate_content(
+        response = client.models.generate_content(
             model="gemini-2.5-flash",
             contents=prompt
         )
@@ -321,18 +322,22 @@ def ai_parse(text):
 
 def generate_insights(summary_text):
     """Calls Gemini with a spending summary and returns 3 plain-English insights."""
-    prompt = (
-        "You are a personal finance assistant. Given this spending summary, "
-        "provide 3 concise, specific insights in plain English. Each insight should "
-        "be one sentence. Focus on patterns, anomalies, or actionable observations. "
-        "Do not use bullet points — number them 1, 2, 3. Be direct and specific "
-        f"with numbers from the data.\n\n{summary_text}"
-    )
-    response = gemini_client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-    return response.text.strip()
+    try:
+        client = genai.Client(api_key=st.secrets["GOOGLE_API_KEY"])
+        prompt = (
+            "You are a personal finance assistant. Given this spending summary, "
+            "provide 3 concise, specific insights in plain English. Each insight should "
+            "be one sentence. Focus on patterns, anomalies, or actionable observations. "
+            "Do not use bullet points — number them 1, 2, 3. Be direct and specific "
+            f"with numbers from the data.\n\n{summary_text}"
+        )
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+        return response.text.strip()
+    except Exception as e:
+        raise RuntimeError(f"{type(e).__name__}: {str(e)}") from e
 
 def save_data(date, category, item, cost, type_, user):
     """Inserts a new transaction into Supabase."""
@@ -603,7 +608,7 @@ with tab1:
     net_balance = total_income - total_expense
 
     if net_balance > 0:
-        savings_rate    = st.slider("Target Savings Rate (%)", min_value=0, max_value=100, value=30, format="%d%%")
+        savings_rate    = st.slider("Target Savings Rate (%)", min_value=0, max_value=100, value=30, format="%d%%", key="savings_rate")
         savings_amount  = net_balance * (savings_rate / 100)
         spending_amount = net_balance - savings_amount
 
