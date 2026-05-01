@@ -182,6 +182,19 @@ def inject_custom_css():
         .stToggle label {
             color: #f9fafb !important;
         }
+
+        /* Delete buttons — 7th column of the Manage Data rows */
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(7) .stButton > button {
+            background-color: transparent !important;
+            color: #6b7280 !important;
+            border: 1px solid #374151 !important;
+            border-radius: 6px !important;
+        }
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(7) .stButton > button:hover {
+            background-color: #450a0a !important;
+            border-color: #ef4444 !important;
+            color: #ef4444 !important;
+        }
         </style>
         """,
         unsafe_allow_html=True,
