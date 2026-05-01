@@ -354,6 +354,45 @@ def main():
     st.set_page_config(page_title="FinanceAI", page_icon="◈", layout="wide")
     inject_custom_css()
 
+    # Button visibility overrides — injected after inject_custom_css() so these
+    # rules win on conflict (last CSS wins when both use !important).
+    st.markdown(
+        """
+        <style>
+        /* ── Sidebar form submit ("Save Transaction") ─────────────────────────
+           stFormSubmitButton is a separate container from stButton, so it
+           misses the global gold rule and renders white-on-white. */
+        .stFormSubmitButton > button,
+        [data-testid="stFormSubmitButton"] > button {
+            background-color: #0d1b2a !important;
+            color: #f0b429 !important;
+            border: 1px solid #f0b429 !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+        }
+        .stFormSubmitButton > button:hover,
+        [data-testid="stFormSubmitButton"] > button:hover {
+            background-color: #1a2d45 !important;
+            color: #f0b429 !important;
+            border-color: #f0b429 !important;
+        }
+
+        /* ── Delete buttons — 7th column of Manage Data rows ──────────────── */
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(7) .stButton > button {
+            background-color: #8B0000 !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 6px !important;
+        }
+        [data-testid="stHorizontalBlock"] [data-testid="column"]:nth-child(7) .stButton > button:hover {
+            background-color: #a31515 !important;
+            color: #ffffff !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
     # --- SIDEBAR ---
     with st.sidebar:
         st.markdown(
