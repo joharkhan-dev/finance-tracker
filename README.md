@@ -1,5 +1,7 @@
 # FinanceAI
 
+> **🔗 Live demo:** https://finance-tracker-o7uycnx6z9weoq99mtappgi.streamlit.app
+
 AI-powered personal finance tracker for natural language expense logging and spending analysis.
 
 ![Python 3.11+](https://img.shields.io/badge/Python-3.11+-blue?logo=python&logoColor=white)
