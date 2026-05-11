@@ -7,3 +7,8 @@ my_tracker.csv
 app_local.py
 .DS_Store
 .env
+_lessons/
+CLAUDE.md
+.devcontainer/
+.vscode/
+data/

@@ -1,4 +1,0 @@
-salary
-Salary: 2500
-Rent: 800
-Gym: 45
