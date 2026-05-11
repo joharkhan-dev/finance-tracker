@@ -34,7 +34,7 @@ AI-powered personal finance tracker for natural language expense logging and spe
 **1. Clone the repo**
 
 ```bash
-git clone https://github.com/your-username/my-finance-app.git
+git clone https://github.com/joharkhan-dev/my-finance-app.git
 cd my-finance-app
 ```
 
@@ -174,4 +174,7 @@ my-finance-app/
 
 ## Author
 
-Built by a developer who wanted a smarter way to log and understand personal spending. The goal was a tool that removes the friction of manual budgeting — speak naturally, let AI do the parsing, and get instant visibility into your finances. Built as a portfolio piece for AI engineering and FinTech roles.
+Built by [Johar Khan](https://www.linkedin.com/in/johar-khan-40b909182/) - maths teacher and EdTech AI developer building AI tools that solve real 
+problems. This was my first AI app, built to learn the stack I now use across more serious projects like Examiner Copilot.
+
+GitHub: [@joharkhan-dev](https://github.com/joharkhan-dev)
